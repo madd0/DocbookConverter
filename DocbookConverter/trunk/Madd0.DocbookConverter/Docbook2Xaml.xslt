@@ -5,7 +5,7 @@
                 xmlns:sdf="http://www.supinfo.com/sdf"
 >
   <xsl:output method="xml" indent="yes"/>
-
+  
   <xsl:template match="/">
     <Section xml:space="preserve" TextAlignment="Left" LineHeight="Auto" 
              IsHyphenationEnabled="False" FlowDirection="LeftToRight" NumberSubstitution.CultureSource="User" 
@@ -39,6 +39,16 @@
 
 
   <xsl:template match="para">
+    <Paragraph>
+      <xsl:apply-templates />
+    </Paragraph>
+  </xsl:template>
+
+  <xsl:template match="para/programlisting">
+      <xsl:apply-templates />
+  </xsl:template>
+
+  <xsl:template match="programlisting">
     <Paragraph>
       <xsl:apply-templates />
     </Paragraph>
@@ -87,7 +97,7 @@
   </xsl:template>
 
   <xsl:template match="imageobject">
-    <Image>
+    <Image StretchDirection="DownOnly">
       <xsl:if test=".//imagedata/@width">
         <xsl:attribute name="Width"><xsl:value-of select=".//imagedata/@width"/></xsl:attribute>
       </xsl:if>
