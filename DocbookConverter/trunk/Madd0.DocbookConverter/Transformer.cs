@@ -24,6 +24,9 @@ namespace Madd0.DocbookConverter
     public static class Transformer
     {
         // XslCompiledTransfoms stored as static field in order to reuse compiled XSLT
+        /// <summary>
+        /// 
+        /// </summary>
         private static XslCompiledTransform xamlToDocbookTransform;
         private static XslCompiledTransform docbookToXamlTransform;
 
@@ -116,15 +119,21 @@ namespace Madd0.DocbookConverter
 
         public static Stream ConvertDockbookToXaml(Stream docbook)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(docbook);
+            //XmlDocument doc = new XmlDocument();
+            //doc.PreserveWhitespace = false;
+            //doc.Load(docbook);
 
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.IgnoreWhitespace = true;
+            XmlReader xmlr = XmlReader.Create(docbook, settings);
+            
             var trans = Transformer.GetDocbookToXamlTransform();
             
             var ms = new MemoryStream();
             var writer = new XmlTextWriter(ms, null);
             writer.Formatting = Formatting.Indented;
-            trans.Transform(doc, writer);
+           //trans.Transform(doc, writer);
+            trans.Transform(xmlr, writer);
             ms.Seek(0, SeekOrigin.Begin);
 
             return ms;
@@ -201,6 +210,7 @@ namespace Madd0.DocbookConverter
         private static Stream TransformXamlToDocbook(Stream xaml, bool hasMedia, string relativeAttachmentPath)
         {
             var doc = new XmlDocument();
+            doc.PreserveWhitespace = false;
             doc.Load(xaml);
 
             var trans = Transformer.GetXamlToDocbookTransform();
@@ -212,6 +222,7 @@ namespace Madd0.DocbookConverter
             var ms = new MemoryStream();
             var writer = new XmlTextWriter(ms, null);
             writer.Formatting = Formatting.Indented;
+            
             trans.Transform(doc, args, writer);
             ms.Seek(0, SeekOrigin.Begin);
 
@@ -258,9 +269,9 @@ namespace Madd0.DocbookConverter
         {
             if (Transformer.xamlToDocbookTransform == null)
             {
-                Assembly a = Assembly.GetExecutingAssembly();
+                var a = Assembly.GetExecutingAssembly();
 
-                using (Stream xslt = a.GetManifestResourceStream("Madd0.DocbookEditor.Xaml2Docbook.xslt"))
+                using (var xslt = a.GetManifestResourceStream(string.Concat(typeof(Transformer).Namespace, ".Xaml2Docbook.xslt")))
                 {
                     Transformer.xamlToDocbookTransform = new XslCompiledTransform();
                     Transformer.xamlToDocbookTransform.Load(new XmlTextReader(xslt));
@@ -274,9 +285,9 @@ namespace Madd0.DocbookConverter
         {
             if (Transformer.docbookToXamlTransform == null)
             {
-                Assembly a = Assembly.GetExecutingAssembly();
+                var a = Assembly.GetExecutingAssembly();
 
-                using (Stream xslt = a.GetManifestResourceStream("Madd0.DocbookEditor.Docbook2Xaml.xslt"))
+                using (var xslt = a.GetManifestResourceStream(string.Concat(typeof(Transformer).Namespace, ".Docbook2Xaml.xslt")))
                 {
                     Transformer.docbookToXamlTransform = new XslCompiledTransform();
                     Transformer.docbookToXamlTransform.Load(new XmlTextReader(xslt));
